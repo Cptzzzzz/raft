@@ -230,7 +230,7 @@ func (rf *Raft) checkMatchIndex() {
 		return
 	}
 	last := rf.CommitIndex
-	for N := len(rf.Logs) - 1; N >= rf.CommitIndex+1; N++ {
+	for N := len(rf.Logs) - 1; N >= rf.CommitIndex+1; N-- {
 		votes := 0
 		for i := len(global.Peers) - 1; i >= 0; i-- {
 			if rf.MatchIndex[i] >= N || i == rf.Me {
