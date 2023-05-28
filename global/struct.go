@@ -52,6 +52,7 @@ const (
 	UPDATE
 	READ
 	DELETE
+	NULL
 )
 
 type Command struct {

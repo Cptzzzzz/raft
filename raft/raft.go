@@ -12,6 +12,8 @@ func Make(me int) *Raft {
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
 	rf.Alive = true
+	rf.LastApplied = -1
+	rf.CommitIndex = 0
 	rf.Me = me
 	rf.CurrentTerm = 0
 	rf.State = global.FOLLOWER
@@ -58,6 +60,16 @@ func (rf *Raft) sendRequestVote(peer int, args global.RequestVoteArgs) {
 		return
 	}
 	rf.DPrintf("become leader")
+	entryLog := global.Log{
+		Index: len(rf.Logs),
+		Term:  rf.CurrentTerm,
+		Command: global.Command{
+			Operator: global.NULL,
+			Key:      "",
+			Value:    "",
+		},
+	}
+	rf.Logs = append(rf.Logs, entryLog)
 	rf.Votes = 0
 	rf.State = global.LEADER
 	rf.stopTimer()
@@ -65,9 +77,11 @@ func (rf *Raft) sendRequestVote(peer int, args global.RequestVoteArgs) {
 	rf.MatchIndex = make([]int, len(global.Peers))
 	for i := len(global.Peers) - 1; i >= 0; i-- {
 		rf.NextIndex[i] = len(rf.Logs)
-		rf.MatchIndex[i] = 0
 		if rf.Me != i {
+			rf.MatchIndex[i] = 0
 			go rf.startHeartbeat(i, rf.CurrentTerm)
+		} else {
+			rf.MatchIndex[i] = len(rf.Logs) - 1
 		}
 	}
 }
