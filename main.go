@@ -29,7 +29,6 @@ func setup() {
 		panic(err)
 	}
 	global.HttpClient = &http.Client{Timeout: time.Second * 5}
-	raft.Rf = raft.Make(viper.GetInt("me"))
 	global.Peers = viper.GetStringSlice("hosts")
 	raft.DPrintf("length of peers: %d", len(global.Peers))
 	global.JudgeHost = viper.GetString("judge")
@@ -38,4 +37,5 @@ func setup() {
 	for index, host := range viper.GetStringSlice("hosts") {
 		raft.DPrintf("node: %d, host: %s", index, host)
 	}
+	raft.Rf = raft.Make(viper.GetInt("me"))
 }
