@@ -31,6 +31,7 @@ func setup() {
 	global.HttpClient = &http.Client{Timeout: time.Second * 5}
 	raft.Rf = raft.Make(viper.GetInt("me"))
 	global.Peers = viper.GetStringSlice("hosts")
+	raft.DPrintf("length of peers: %d", len(global.Peers))
 	global.JudgeHost = viper.GetString("judge")
 	raft.DPrintf("me: %d", viper.GetInt("me"))
 	global.Me = viper.GetInt("me")

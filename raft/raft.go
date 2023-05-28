@@ -55,6 +55,7 @@ func (rf *Raft) sendRequestVote(peer int, args global.RequestVoteArgs) {
 	if rf.Votes <= len(global.Peers)/2 {
 		return
 	}
+	rf.DPrintf("become leader")
 	rf.Votes = 0
 	rf.State = global.LEADER
 	rf.stopTimer()
@@ -143,6 +144,7 @@ func (rf *Raft) sendAppendEntries(peer, term int, args global.AppendEntriesArgs)
 func (rf *Raft) startElection() {
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
+	rf.DPrintf("start a election")
 	rf.State = global.CANDIDATE
 	rf.CurrentTerm++
 	rf.VotedFor = rf.Me
@@ -338,7 +340,7 @@ func (rf *Raft) Append(command global.Command) (int, int, bool, int) {
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
 	if rf.State != global.LEADER {
-		return -1, -1, false, rf.VotedFor
+		return -1, rf.CurrentTerm, false, rf.VotedFor
 	}
 	entryLog := global.Log{
 		Index:   len(rf.Logs),
