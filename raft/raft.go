@@ -39,6 +39,8 @@ func (rf *Raft) sendRequestVote(peer int, args global.RequestVoteArgs) {
 	json.Unmarshal(body, &reply)
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
+	defer rf.DPrintf("leave sendRequestVote")
+	rf.DPrintf("sendRequestVote")
 	if !(rf.State == global.CANDIDATE &&
 		rf.CurrentTerm == args.Term &&
 		rf.Me == args.CandidateId) {
@@ -73,6 +75,8 @@ func (rf *Raft) sendRequestVote(peer int, args global.RequestVoteArgs) {
 func (rf *Raft) startHeartbeat(peer, term int) {
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
+	defer rf.DPrintf("leave startHeartbeat")
+	rf.DPrintf("startHeartbeat")
 	if rf.State != global.LEADER || rf.CurrentTerm != term {
 		return
 	}
@@ -101,6 +105,8 @@ func (rf *Raft) sendAppendEntries(peer, term int, args global.AppendEntriesArgs)
 	json.Unmarshal(body, &reply)
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
+	defer rf.DPrintf("leave sendAppendEntries")
+	rf.DPrintf("sendAppendEntries")
 	if rf.State != global.LEADER || rf.CurrentTerm != term {
 		return
 	}
@@ -217,6 +223,8 @@ func (rf *Raft) becomeFollower(term int, reset bool) {
 func (rf *Raft) checkMatchIndex() {
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
+	defer rf.DPrintf("leave checkMatchIndex")
+	rf.DPrintf("checkMatchIndex")
 	rf.CheckMatchIndex = false
 	if rf.State != global.LEADER {
 		return
@@ -243,6 +251,8 @@ func (rf *Raft) checkMatchIndex() {
 func (rf *Raft) checkLastApplied() {
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
+	defer rf.DPrintf("leave checkLastApplied")
+	rf.DPrintf("checkLastApplied")
 	rf.CheckLastApplied = false
 	if rf.CurrentTerm != rf.Logs[rf.CommitIndex].Term {
 		return
@@ -261,6 +271,8 @@ func (rf *Raft) checkLastApplied() {
 func (rf *Raft) AppendEntries(args *global.AppendEntriesArgs, reply *global.AppendEntriesReply) {
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
+	defer rf.DPrintf("leave AppendEntries")
+	rf.DPrintf("AppendEntries")
 	reply.Success = false
 	if args.Term < rf.CurrentTerm {
 		reply.Term = rf.CurrentTerm
@@ -305,6 +317,8 @@ func (rf *Raft) AppendEntries(args *global.AppendEntriesArgs, reply *global.Appe
 func (rf *Raft) RequestVote(args *global.RequestVoteArgs, reply *global.RequestVoteReply) {
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
+	defer rf.DPrintf("leave RequestVote")
+	rf.DPrintf("RequestVote")
 	reply.VoteGranted = false
 	if rf.CurrentTerm > args.Term {
 		reply.Term = rf.CurrentTerm
@@ -341,6 +355,8 @@ func (rf *Raft) applier(ch chan global.ApplyMsg) {
 func (rf *Raft) Append(command global.Command) (int, int, bool, int) {
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
+	defer rf.DPrintf("leave Append")
+	rf.DPrintf("Append")
 	if rf.State != global.LEADER {
 		return -1, rf.CurrentTerm, false, rf.VotedFor
 	}
