@@ -193,6 +193,7 @@ func (rf *Raft) resetHeartbeatTimer(peer, term int) {
 }
 
 func (rf *Raft) stopHeartbeatTimer(peer int) {
+	rf.DPrintf("length %d index %d", len(rf.HeartBeatTimer), peer)
 	if rf.HeartBeatTimer[peer] != nil {
 		rf.HeartBeatTimer[peer].Stop()
 	}
