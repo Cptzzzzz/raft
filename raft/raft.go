@@ -23,6 +23,7 @@ func Make(me int) *Raft {
 		Term:  0,
 	})
 	rf.HeartBeatTimer = make([]*time.Timer, len(global.Peers))
+	rf.DPrintf("length of HeartBeatTimer :%d", len(rf.HeartBeatTimer))
 	rf.TimeoutTimer = time.AfterFunc(rf.electionTimeout(), rf.startElection)
 	rf.ApplyChan = make(chan global.ApplyMsg)
 	go rf.applier(rf.ApplyChan)
