@@ -8,7 +8,7 @@ RUN go env -w GOPROXY=https://goproxy.cn,direct
 
 RUN go mod download
 
-RUN go build -o /work/raft .
+RUN go build -o /work/raft main.go
 
 FROM alpine:3.15 AS runner
 
