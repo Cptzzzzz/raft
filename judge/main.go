@@ -52,18 +52,22 @@ func result(c *gin.Context) {
 	defer mu.Unlock()
 	reply := Reply{}
 	res := make(map[int][]global.Command)
+	flag := false
 	for i := 0; i < 5; i++ {
 		res[i] = make([]global.Command, len(data[i]))
 		for k, v := range data[i] {
 			if k >= len(data[i]) {
-				reply.Message = "log length wrong"
-				c.JSON(http.StatusBadGateway, reply)
-				return
+				flag = true
 			}
 			res[i][k] = v
 		}
 	}
 	reply.Data = res
+	if flag {
+		reply.Message = "log length wrong"
+		c.JSON(http.StatusBadGateway, reply)
+		return
+	}
 	for i := 0; i < 4; i++ {
 		if !reflect.DeepEqual(res[i], res[4]) {
 			reply.Message = "log content wrong"
