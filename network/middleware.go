@@ -25,6 +25,7 @@ func checkFault(c *gin.Context) {
 	if shouldBlock {
 		c.Abort()
 		c.String(http.StatusOK, "Packet loss")
+		raft.DPrintf("block request from [%d]", node)
 		return
 	} else {
 		time.Sleep(delayTime)
