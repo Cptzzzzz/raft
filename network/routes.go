@@ -13,7 +13,7 @@ func InitRoutes() {
 	client.POST("/delay", delay)
 
 	node := global.Router.Group("/raft")
-	client.Use(checkFault)
+	node.Use(checkFault)
 	node.POST("/append-entries", appendEntries)
 	node.POST("/request-vote", requestVote)
 }
