@@ -49,6 +49,7 @@ func (rf *Raft) sendRequestVote(peer int, args global.RequestVoteArgs) {
 	defer rf.Mu.Unlock()
 	//defer rf.DPrintf("leave sendRequestVote")
 	//rf.DPrintf("sendRequestVote")
+	rf.DPrintf("send RequestVote to [%d]", peer)
 	if !rf.Alive {
 		return
 	}
@@ -106,7 +107,6 @@ func (rf *Raft) startHeartbeat(peer, term int) {
 	if rf.State != global.LEADER || rf.CurrentTerm != term {
 		return
 	}
-	rf.DPrintf("prevLogIndex :%d", rf.NextIndex[peer]-1)
 	args := global.AppendEntriesArgs{
 		Term:         rf.CurrentTerm,
 		LeaderId:     rf.Me,
@@ -135,6 +135,7 @@ func (rf *Raft) sendAppendEntries(peer, term int, args global.AppendEntriesArgs)
 	defer rf.Mu.Unlock()
 	//defer rf.DPrintf("leave sendAppendEntries")
 	//rf.DPrintf("sendAppendEntries")
+	rf.DPrintf("send Heartbeat to [%d]", peer)
 	if !rf.Alive {
 		return
 	}
