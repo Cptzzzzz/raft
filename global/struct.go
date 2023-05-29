@@ -51,6 +51,14 @@ type StateReply struct {
 	Alive       bool   `json:"alive"`
 }
 
+type DelayArgs struct {
+	Delay []int `json:"delay"`
+}
+
+type BlockArgs struct {
+	Block []bool `json:"block"`
+}
+
 const (
 	LEADER    = 1
 	CANDIDATE = 2

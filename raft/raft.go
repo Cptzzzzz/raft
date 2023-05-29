@@ -35,13 +35,17 @@ func (rf *Raft) sendRequestVote(peer int, args global.RequestVoteArgs) {
 	var reply global.RequestVoteReply
 	body, _ := json.Marshal(&args)
 	body = SendRequest(global.Peers[peer]+"/raft/request-vote", body)
-	if body == nil {
+	if body == nil || string(body) == "Packet loss" {
+		DPrintf("Packet loss")
 		return
 	}
 	json.Unmarshal(body, &reply)
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
 	defer rf.DPrintf("leave sendRequestVote")
+	if !rf.Alive {
+		return
+	}
 	rf.DPrintf("sendRequestVote")
 	if !(rf.State == global.CANDIDATE &&
 		rf.CurrentTerm == args.Term &&
@@ -90,6 +94,9 @@ func (rf *Raft) startHeartbeat(peer, term int) {
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
 	defer rf.DPrintf("leave startHeartbeat")
+	if !rf.Alive {
+		return
+	}
 	rf.DPrintf("startHeartbeat")
 	if rf.State != global.LEADER || rf.CurrentTerm != term {
 		return
@@ -114,13 +121,17 @@ func (rf *Raft) sendAppendEntries(peer, term int, args global.AppendEntriesArgs)
 	var reply global.AppendEntriesReply
 	body, _ := json.Marshal(&args)
 	body = SendRequest(global.Peers[peer]+"/raft/append-entries", body)
-	if body == nil {
+	if body == nil || string(body) == "Packet loss" {
+		DPrintf("Packet loss")
 		return
 	}
 	json.Unmarshal(body, &reply)
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
 	defer rf.DPrintf("leave sendAppendEntries")
+	if !rf.Alive {
+		return
+	}
 	rf.DPrintf("sendAppendEntries")
 	if rf.State != global.LEADER || rf.CurrentTerm != term {
 		return
@@ -165,6 +176,9 @@ func (rf *Raft) sendAppendEntries(peer, term int, args global.AppendEntriesArgs)
 func (rf *Raft) startElection() {
 	rf.Mu.Lock()
 	defer rf.Mu.Unlock()
+	if !rf.Alive {
+		return
+	}
 	rf.DPrintf("start a election")
 	rf.State = global.CANDIDATE
 	rf.CurrentTerm++
@@ -185,7 +199,7 @@ func (rf *Raft) startElection() {
 }
 
 func (rf *Raft) electionTimeout() time.Duration {
-	return time.Millisecond * time.Duration(400+rand.Intn(300))
+	return time.Millisecond * time.Duration(1000+rand.Intn(500))
 }
 
 func (rf *Raft) resetTimer() {
@@ -201,7 +215,7 @@ func (rf *Raft) stopTimer() {
 }
 
 func (rf *Raft) heartbeatTimeout() time.Duration {
-	return time.Millisecond * time.Duration(100)
+	return time.Millisecond * time.Duration(400)
 }
 
 func (rf *Raft) resetHeartbeatTimer(peer, term int) {
@@ -372,6 +386,9 @@ func (rf *Raft) Append(command global.Command) (int, int, bool, int) {
 	defer rf.Mu.Unlock()
 	defer rf.DPrintf("leave Append")
 	rf.DPrintf("Append")
+	if !rf.Alive {
+		return -1, -1, false, -1
+	}
 	if rf.State != global.LEADER {
 		return -1, rf.CurrentTerm, false, rf.VotedFor
 	}
@@ -395,6 +412,19 @@ func (rf *Raft) GetState(reply *global.StateReply) {
 	reply.CommitIndex = rf.CommitIndex
 	reply.LastApplied = rf.LastApplied
 	reply.Alive = rf.Alive
+}
+
+func (rf *Raft) Crash() {
+	rf.Mu.Lock()
+	rf.Alive = false
+	rf.Mu.Unlock()
+}
+
+func (rf *Raft) Recover() {
+	rf.Mu.Lock()
+	rf.Alive = true
+	rf.resetTimer()
+	rf.Mu.Unlock()
 }
 
 var Rf *Raft

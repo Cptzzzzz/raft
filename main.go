@@ -14,6 +14,7 @@ func main() {
 	setup()
 	global.Router = gin.Default()
 	network.InitRoutes()
+	network.InitFault()
 	err := global.Router.Run("0.0.0.0:80")
 	if err != nil {
 		return

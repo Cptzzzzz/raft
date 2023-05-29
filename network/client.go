@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"raft/global"
 	"raft/raft"
+	"time"
 )
 
 func operate(c *gin.Context) {
@@ -34,17 +35,45 @@ func state(c *gin.Context) {
 }
 
 func block(c *gin.Context) {
-
+	var args global.BlockArgs
+	if err := c.ShouldBindJSON(&args); err != nil {
+		c.String(http.StatusBadGateway, "request error")
+		return
+	}
+	mu.Lock()
+	for k, v := range args.Block {
+		nodeBlock[k] = v
+	}
+	mu.Unlock()
+	c.String(http.StatusOK, "ok")
 }
 
 func crash(c *gin.Context) {
-
+	mu.Lock()
+	crashed = true
+	mu.Unlock()
+	raft.Rf.Crash()
+	c.String(http.StatusOK, "ok")
 }
 
 func recovery(c *gin.Context) {
-
+	mu.Lock()
+	crashed = false
+	mu.Unlock()
+	raft.Rf.Recover()
+	c.String(http.StatusOK, "ok")
 }
 
 func delay(c *gin.Context) {
-
+	var args global.DelayArgs
+	if err := c.ShouldBindJSON(&args); err != nil {
+		c.String(http.StatusBadGateway, "request error")
+		return
+	}
+	mu.Lock()
+	for k, v := range args.Delay {
+		nodeDelay[k] = time.Duration(v) * time.Millisecond
+	}
+	mu.Unlock()
+	c.String(http.StatusOK, "ok")
 }
