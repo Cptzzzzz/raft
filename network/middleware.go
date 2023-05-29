@@ -9,7 +9,7 @@ import (
 
 func checkFault(c *gin.Context) {
 	ip := c.ClientIP()
-	raft.DPrintf("client ip: [%s]", ip)
+	raft.DPrintf("node ip: [%s]", ip)
 	var shouldBlock bool
 	var delayTime time.Duration
 	mu.Lock()

@@ -66,9 +66,8 @@ const (
 )
 
 const (
-	CREATE = iota
-	UPDATE
-	READ
+	SET = iota
+	GET
 	DELETE
 	NULL
 )
@@ -94,4 +93,9 @@ type JudgeArgs struct {
 	Command      `json:"command"`
 	CommandIndex int `json:"commandIndex"`
 	Peer         int `json:"peer"`
+}
+
+type JudgeResultReply struct {
+	Data    map[int][]Command `json:"data"`
+	Message string            `json:"message"`
 }

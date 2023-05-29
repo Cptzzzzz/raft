@@ -59,7 +59,6 @@ func (rf *Raft) sendRequestVote(peer int, args global.RequestVoteArgs) {
 		return
 	}
 	if rf.CurrentTerm < reply.Term {
-		//todo become follower
 		rf.becomeFollower(reply.Term, false)
 		return
 	}
@@ -143,7 +142,6 @@ func (rf *Raft) sendAppendEntries(peer, term int, args global.AppendEntriesArgs)
 		return
 	}
 	if term < reply.Term {
-		//todo become follower
 		rf.becomeFollower(reply.Term, true)
 		return
 	}

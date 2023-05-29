@@ -11,11 +11,6 @@ import (
 var data []map[int]global.Command
 var mu sync.Mutex
 
-type Reply struct {
-	Data    map[int][]global.Command `json:"data"`
-	Message string                   `json:"message"`
-}
-
 func main() {
 	g := gin.Default()
 	g.POST("/msg", solve)
@@ -50,7 +45,7 @@ func reset(c *gin.Context) {
 func result(c *gin.Context) {
 	mu.Lock()
 	defer mu.Unlock()
-	reply := Reply{}
+	reply := global.JudgeResultReply{}
 	res := make(map[int][]global.Command)
 	flag := false
 	for i := 0; i < 5; i++ {
