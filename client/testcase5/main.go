@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"raft/client/lib"
 	"raft/global"
+	"sync"
 	"time"
 )
 
@@ -41,8 +42,8 @@ func changeLeader() {
 	time.Sleep(3 * time.Second)
 	write(30)
 	lib.RecoverCrash(oldLeader)
-
 }
+
 func crashAndDelay() {
 	fmt.Println("--- Crash and Delay ---")
 	who := rand.Int() % 8
@@ -64,6 +65,7 @@ func crashAndDelay() {
 	lib.RecoverDelay(delayer2)
 	lib.RecoverCrash(who)
 }
+
 func partitionAndDelay() {
 	fmt.Println("--- Partition and Delay ---")
 	who := rand.Int() % 8
@@ -88,13 +90,19 @@ func partitionAndDelay() {
 func write(number int) {
 	leader := lib.OneLeader()
 	fmt.Printf("Write %d Logs to Leader %d\n", number, leader)
+	wg := sync.WaitGroup{}
+	wg.Add(number)
 	for i := 0; i < number; i++ {
-		lib.SendOperation(leader, global.Command{
-			Operator: lib.RandomOperator(),
-			Key:      fmt.Sprintf("raft-kv-%d", rand.Int()%100),
-			Value:    fmt.Sprintf("%d", rand.Int()),
-		})
+		go func() {
+			lib.SendOperation(leader, global.Command{
+				Operator: lib.RandomOperator(),
+				Key:      fmt.Sprintf("raft-kv-%d", rand.Int()%100),
+				Value:    fmt.Sprintf("%d", rand.Int()),
+			})
+			wg.Done()
+		}()
 	}
+	wg.Wait()
 }
 
 func checkConsensus(pass int) {

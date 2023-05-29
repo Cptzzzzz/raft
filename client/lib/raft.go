@@ -138,6 +138,7 @@ func GenerateCrash(peer int) {
 		}
 	}
 }
+
 func RecoverCrash(peer int) {
 	for {
 		res := SendClientRequest(Hosts[peer]+"/client/recover", make([]byte, 0))
