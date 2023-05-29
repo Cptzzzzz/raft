@@ -385,4 +385,16 @@ func (rf *Raft) Append(command global.Command) (int, int, bool, int) {
 	return entryLog.Index, rf.CurrentTerm, true, rf.Me
 }
 
+func (rf *Raft) GetState(reply *global.StateReply) {
+	rf.Mu.Lock()
+	defer rf.Mu.Unlock()
+	reply.State = rf.stateString()
+	reply.CurrentTerm = rf.CurrentTerm
+	reply.VotedFor = rf.VotedFor
+	reply.Logs = rf.Logs
+	reply.CommitIndex = rf.CommitIndex
+	reply.LastApplied = rf.LastApplied
+	reply.Alive = rf.Alive
+}
+
 var Rf *Raft

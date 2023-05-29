@@ -28,7 +28,9 @@ func operate(c *gin.Context) {
 }
 
 func state(c *gin.Context) {
-
+	var reply global.StateReply
+	raft.Rf.GetState(&reply)
+	c.JSON(http.StatusOK, reply)
 }
 
 func block(c *gin.Context) {

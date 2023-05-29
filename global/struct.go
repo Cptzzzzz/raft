@@ -41,6 +41,16 @@ type AppendEntriesReply struct {
 	ConflictIndex int  `json:"conflictIndex"`
 }
 
+type StateReply struct {
+	State       string `json:"state"`
+	CurrentTerm int    `json:"currentTerm"`
+	VotedFor    int    `json:"votedFor"`
+	Logs        []Log  `json:"logs"`
+	CommitIndex int    `json:"commitIndex"`
+	LastApplied int    `json:"lastApplied"`
+	Alive       bool   `json:"alive"`
+}
+
 const (
 	LEADER    = 1
 	CANDIDATE = 2
@@ -62,9 +72,9 @@ type Command struct {
 }
 
 type Log struct {
-	Index int
-	Term  int
-	Command
+	Index   int `json:"index"`
+	Term    int `json:"term"`
+	Command `json:"command"`
 }
 
 type ApplyMsg struct {
