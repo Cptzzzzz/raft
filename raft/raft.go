@@ -94,6 +94,7 @@ func (rf *Raft) startHeartbeat(peer, term int) {
 	if rf.State != global.LEADER || rf.CurrentTerm != term {
 		return
 	}
+	rf.DPrintf("prevLogIndex :%d", rf.NextIndex[peer]-1)
 	args := global.AppendEntriesArgs{
 		Term:         rf.CurrentTerm,
 		LeaderId:     rf.Me,
