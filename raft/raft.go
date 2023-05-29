@@ -98,8 +98,8 @@ func (rf *Raft) startHeartbeat(peer, term int) {
 	args := global.AppendEntriesArgs{
 		Term:         rf.CurrentTerm,
 		LeaderId:     rf.Me,
-		PrevLogIndex: max(rf.NextIndex[peer]-1, 0),
-		PrevLogTerm:  rf.Logs[max(rf.NextIndex[peer]-1, 0)].Term,
+		PrevLogIndex: rf.NextIndex[peer] - 1,
+		PrevLogTerm:  rf.Logs[rf.NextIndex[peer]-1].Term,
 		Entries:      rf.Logs[rf.NextIndex[peer]:],
 		LeaderCommit: rf.CommitIndex,
 	}
@@ -154,7 +154,7 @@ func (rf *Raft) sendAppendEntries(peer, term int, args global.AppendEntriesArgs)
 			}
 		}
 		if flag {
-			rf.NextIndex[peer] = reply.ConflictIndex
+			rf.NextIndex[peer] = max(reply.ConflictIndex, 1)
 		}
 	}
 	if rf.NextIndex[peer] != len(rf.Logs) || rf.MatchIndex[peer] != len(rf.Logs)-1 {
